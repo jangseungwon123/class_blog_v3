@@ -14,6 +14,17 @@ public class UserRepositoryTest {
     @Autowired //처리 DI
     private UserRepository userRepository;
 
+
+    @Test
+    public void findByusernameAndPassword_로그인_성공_테스트() {
+        String username = "ssar";
+        String password = "1234";
+
+        User user = userRepository.findByUsernameAndPassword(username,password);
+        Assertions.assertThat(user).isNotNull(); // 로그인 성공
+        Assertions.assertThat(user.getUsername()).isEqualTo("ssar");
+    }
+
     @Test
     public void save_회원가입_테스트() {
         //given : 회원 가입시 사용할 사용자 정보
