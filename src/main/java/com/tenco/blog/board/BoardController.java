@@ -19,6 +19,48 @@ public class BoardController {
     //DI 처리
     private final BoardRepository boardRepository;
 
+    // 게시글 삭제 액션 처리
+    // /board/{{board.id}}/delete
+
+    // 1. 로그인 여부 (인증 검사)
+    // 2. 로그인 X (로그인 페이지로 리다이렉트 처리)
+    // 3. 로그인  o (게시물 존재 여부 다시 확인)  -- 동시 삭제를 예방한다. -- 이미 삭제된 게시물입니다.
+    // 4. 권한 체크 (1 유저의 개시물인데 3번 유저가 삭제할 수 없음)
+    // 5. 리스트화면으로 리다이렉트 처리
+    @PostMapping("/board/{id}/delete")
+    public String delete(@PathVariable(name = "id") Long id, HttpSession session){
+
+        // 1. 로그인 체크 Define.SESSION_USER
+        User sessionUser = (User) session.getAttribute("sessionUser");
+        if (sessionUser == null){
+            // 로그인 페이지로 리다이렉트 처리
+            // redirect:/login-form --> 내부에서 페이지를 찾는게 아님
+            // 다시 클라이언트에 와서 -> GET 요청이 온것 (HTTP 메세지 생성)
+            return "redirect:/login-form";
+        }
+
+        // <== 관리자가 게시물 강제삭제 (0.01초 사이에)
+        // -->>
+        // 3. 게시물 존재 여부 확인
+        Board board = boardRepository.findById(id);
+        if (board == null){
+            throw new IllegalArgumentException("이미 삭제된 게시물입니다.");
+        }
+//        // 4. 소유자 확인 : 권한 체크
+        if (! board.isOwner(sessionUser.getId())){
+            throw new RuntimeException("삭제 권한이 없습니다.");
+        }
+//        if (!(sessionUser.getId() == board.getUser().getId())){
+//            throw new RuntimeException("삭제 권한이 없습니다.");
+//        }
+
+        // 5. 권한 확인 이후 삭제 처리
+        boardRepository.deleteById(id);
+
+        // 6 삭제 성공시 리다이렉트 처리
+        return "redirect:/";
+    }
+
     /**
      * 주소 설계 : http://localhost:8080/board/save-form
      *

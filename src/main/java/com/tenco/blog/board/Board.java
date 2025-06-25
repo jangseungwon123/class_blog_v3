@@ -39,17 +39,16 @@ public class Board {
     @CreationTimestamp
     private Timestamp createdAt; // created_at (스네이크 케이스로 자동 변환)
 
-    // 생성자 만들어 주기
-//    public Board(String title, String content, String username) {
-//        this.title = title;
-//        this.content = content;
-//        //this.username = username;
-//
-//    }
+    // 게시글에 소유자를 직접 확인하는 기능을 만들자
+    public boolean isOwner(Long checkUserId){
+        return this.user.getId().equals(checkUserId);
+    }
+
 
     // 머스태치에서 표현할 시간을 포맷기능을(행위) 스스로 만들자
     public String getTime() {
         return MyDateUtil.timestampFormat(createdAt);
     }
+
 
 }
